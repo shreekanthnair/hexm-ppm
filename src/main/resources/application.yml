@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: hexm-project-management
+  datasource:
+    url: jdbc:oracle:thin:@localhost:1521:xe
+    username: hexm
+    password: hexm
+    driver-class-name: oracle.jdbc.driver.OracleDriver
+  jpa:
+    show-sql: true
+    database: ORACLE
+    hibernate:
+      ddl-auto: validate
+    
+server:
+  context-path: /hexm-ppm-service
+  port: 9001
