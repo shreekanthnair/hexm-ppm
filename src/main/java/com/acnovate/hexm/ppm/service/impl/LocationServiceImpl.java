@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.acnovate.hexm.common.web.resources.project.LocationResource;
 import com.acnovate.hexm.ppm.dao.repository.LocationRepository;
+import com.acnovate.hexm.ppm.dao.specifications.LocationSpecifications;
 import com.acnovate.hexm.ppm.model.Location;
 import com.acnovate.hexm.ppm.resources.converter.LocationToLocationResourceConverter;
 import com.acnovate.hexm.ppm.service.LocationService;
@@ -31,7 +32,9 @@ public class LocationServiceImpl implements LocationService {
 	public Page<LocationResource> getAllLocationResources(String locationName, String region, String country,
 			int pageNumber, int pageSize) {
 		Pageable pageable = new PageRequest(pageNumber, pageSize);
-		Page<Location> pagedLocation = locationRepository.findAll(new PageRequest(pageNumber, pageSize));
+		Page<Location> pagedLocation = locationRepository.findAll(
+				LocationSpecifications.buildSpecificationsForFilters(locationName, region, country),
+				new PageRequest(pageNumber, pageSize));
 		List<LocationResource> locationResources = LOCATION_CONVERTER.convert(pagedLocation.getContent());
 		return new PageImpl<>(locationResources, pageable, pagedLocation.getTotalElements());
 	}

@@ -1,5 +1,6 @@
 package com.acnovate.hexm.ppm.service.impl;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,7 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 
 import com.acnovate.hexm.common.web.resources.project.ProjectResource;
@@ -35,10 +35,11 @@ public class ProjectServiceImpl implements ProjectService {
 
 	@Override
 	public Page<ProjectResource> getAllProjectResources(String projectCode, String clientName, boolean external,
-			Long poNumber, int pageNumber, int pageSize) {
+			Long poNumber, Collection<String> locationNames, int pageNumber, int pageSize) {
 		Pageable pageable = new PageRequest(pageNumber, pageSize);
 		Page<Project> pagedProject = projectRepository
-				.findAll(Specifications.where(ProjectSpecifications.filterProjectsByProjectCode(projectCode)),
+				.findAll(ProjectSpecifications.buildSpecificationForFilters(projectCode, clientName, external,
+						poNumber, locationNames),
 						pageable);
 		List<ProjectResource> projectResources = PROJECT_RESOURCE_CONVERTER.convert(pagedProject.getContent());
 		return new PageImpl<>(projectResources, pageable, pagedProject.getTotalElements());
@@ -58,6 +59,12 @@ public class ProjectServiceImpl implements ProjectService {
 		project.setBaseLocation(location);
 
 		project = projectRepository.save(project);
+		return PROJECT_RESOURCE_CONVERTER.convert(project);
+	}
+
+	@Override
+	public ProjectResource getProjectDetails(String projectCode) {
+		Project project = projectRepository.findOne(ProjectSpecifications.filterProjectsByProjectCode(projectCode));
 		return PROJECT_RESOURCE_CONVERTER.convert(project);
 	}
 
