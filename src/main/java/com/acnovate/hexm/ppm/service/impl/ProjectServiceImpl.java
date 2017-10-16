@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import com.acnovate.hexm.common.web.resources.project.ProjectResource;
 import com.acnovate.hexm.ppm.dao.repository.LocationRepository;
 import com.acnovate.hexm.ppm.dao.repository.ProjectRepository;
-import com.acnovate.hexm.ppm.dao.repository.ProjectSpecifications;
+import com.acnovate.hexm.ppm.dao.specifications.ProjectSpecifications;
 import com.acnovate.hexm.ppm.model.Location;
 import com.acnovate.hexm.ppm.model.Project;
 import com.acnovate.hexm.ppm.resources.converter.ProjectToProjectResourceConverter;
