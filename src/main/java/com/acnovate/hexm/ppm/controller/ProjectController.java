@@ -4,9 +4,11 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.acnovate.hexm.common.web.resources.project.ProjectResource;
+import com.acnovate.hexm.ppm.controller.assembler.ProjectResourceAssembler;
 import com.acnovate.hexm.ppm.service.ProjectService;
 
 import io.swagger.annotations.Api;
@@ -28,26 +31,35 @@ import io.swagger.annotations.ApiOperation;
 public class ProjectController {
 
 	private final ProjectService projectService;
+	private final ProjectResourceAssembler projectResourceAssembler;
 	
 	@Autowired
-	public ProjectController(final ProjectService projectService) {
+	public ProjectController(final ProjectService projectService,
+			final ProjectResourceAssembler projectResourceAssembler) {
 		this.projectService = projectService;
+		this.projectResourceAssembler = projectResourceAssembler;
 	}
 	
 	@ApiOperation(value = "Gets all the projects assigned to the user", response = PagedResources.class, notes = "For the user "
 			+ "requesting for all the projects, the API responds back with all the projects which are assigned.")
 	@RequestMapping(value = "", method = RequestMethod.GET, produces = MediaTypes.HAL_JSON_VALUE)
-	public ResponseEntity<Page<ProjectResource>> getAllProjects(
+	public ResponseEntity<PagedResources<ProjectResource>> getAllProjects(
 			@RequestParam(value = "projectCode", required = false) String projectCode,
 			@RequestParam(value = "clientName", required = false) String clientName,
 			@RequestParam(value = "external", required = false) boolean external,
 			@RequestParam(value = "poNumber", required = false) Long poNumber,
 			@RequestParam(value = "locationNames", required = false) List<String> locationNames,
 			@RequestParam(value = "pageNumber", required = false, defaultValue = "0") int pageNumber,
-			@RequestParam(value = "pageSize", required = false, defaultValue = "50") int pageSize) {
+			@RequestParam(value = "pageSize", required = false, defaultValue = "50") int pageSize,
+			PagedResourcesAssembler<ProjectResource> pagedResourceAssembler) {
 		Page<ProjectResource> pageProjectResource = projectService.getAllProjectResources(projectCode, clientName,
 				external, poNumber, locationNames, pageNumber, pageSize);
-		return ResponseEntity.ok(pageProjectResource);
+		return ResponseEntity
+				.ok(pagedResourceAssembler.toResource(pageProjectResource, projectResourceAssembler,
+						ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(ProjectController.class)
+								.getAllProjects(projectCode, clientName, external, poNumber, locationNames, pageNumber,
+										pageSize, pagedResourceAssembler))
+								.withSelfRel()));
 	}
 
 	@ApiOperation(value = "Create a new Project", response = ProjectResource.class, notes = "A new project is created"
@@ -55,7 +67,7 @@ public class ProjectController {
 	@RequestMapping(value = "", method = RequestMethod.POST, produces = MediaTypes.HAL_JSON_VALUE)
 	public ResponseEntity<ProjectResource> createProject(@RequestBody ProjectResource projectResource) {
 		ProjectResource newProjectResource = projectService.createNewProject(projectResource);
-		return ResponseEntity.ok(newProjectResource);
+		return ResponseEntity.ok(projectResourceAssembler.toResource(newProjectResource));
 	}
 
 	@ApiOperation(value = "Gets a Project Details", response = ProjectResource.class, notes = "Get the project details based"
@@ -63,6 +75,6 @@ public class ProjectController {
 	@RequestMapping(value = "/{projectCode}", method = RequestMethod.GET, produces = MediaTypes.HAL_JSON_VALUE)
 	public ResponseEntity<ProjectResource> getProjectDetails(@PathVariable(value = "projectCode") String projectCode) {
 		ProjectResource newProjectResource = projectService.getProjectDetails(projectCode);
-		return ResponseEntity.ok(newProjectResource);
+		return ResponseEntity.ok(projectResourceAssembler.toResource(newProjectResource));
 	}
 }

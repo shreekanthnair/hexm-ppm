@@ -51,4 +51,10 @@ public class LocationServiceImpl implements LocationService {
 		return LOCATION_CONVERTER.convert(location);
 	}
 
+	@Override
+	public LocationResource getLocationDetails(String locationName) {
+		Location location = locationRepository.findOne(LocationSpecifications.filterLocationsByName(locationName));
+		return LOCATION_CONVERTER.convert(location);
+	}
+
 }

@@ -34,4 +34,12 @@ public interface LocationService {
 	 * @return {@link LocationResource}
 	 */
 	public LocationResource createNewLocation(LocationResource locationResource);
+
+	/**
+	 * Get the location details based on location name in the system.
+	 * 
+	 * @param locationName
+	 * @return
+	 */
+	public LocationResource getLocationDetails(String locationName);
 }
